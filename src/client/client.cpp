@@ -1,5 +1,4 @@
 #include<chrono>
-#include<cstdio>
 #include<iostream>
 #include<thread>
 #include<Windows.h>
@@ -7,8 +6,10 @@
 #include<minhook/MinHook.h>
 #include<imguihook/imgui_hook.h>
 
-#include "./menu/menu.hpp"
 #include "./client.hpp"
+#include "./menu/menu.hpp"
+#include "./module/moduleManager.hpp"
+#include "sdk/sdk.hpp"
 
 namespace Client
 {
@@ -16,6 +17,27 @@ namespace Client
 	static HINSTANCE g_instance = nullptr;
 
 	static bool g_running = false;
+
+	bool OnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM param)
+	{
+		if(msg == WM_KEYUP)
+		{
+			if(wparam == VK_INSERT)
+			{
+				Menu::g_opened = !Menu::g_opened;
+			}
+			
+			for(auto& module : ModuleManager::getModules())
+			{
+				if(wparam == module->keybind)
+				{
+					module->toggle();
+				}
+			}
+		}
+
+		return Menu::g_opened;
+	}
 
 	void Init(HINSTANCE instance)
 	{
@@ -29,15 +51,25 @@ namespace Client
 		if(MH_Initialize() != MH_OK)
 		{
 			Client::Shutdown();
+			
 			return;
 		}
 
-		if(!ImGuiHook::Load(Menu::RenderMenu, Menu::OnWndProc))
+		if(!SDK::Init())
 		{
 			Client::Shutdown();
 
 			return;
 		}
+
+		if(!ImGuiHook::Load(Menu::RenderMenu, Client::OnWndProc))
+		{
+			Client::Shutdown();
+
+			return;
+		}
+
+		ModuleManager::Init();
 
 		Client::g_running = true;
 
@@ -48,6 +80,14 @@ namespace Client
 				Client::g_running = false;
 			}
 
+			for(auto& module : ModuleManager::getModules())
+			{
+				if(module->enabled)
+				{
+					module->onRunning();
+				}
+			}
+
 			std::this_thread::sleep_for(std::chrono::milliseconds(0));
 		}
 
@@ -56,13 +96,18 @@ namespace Client
 
 	void Shutdown()
 	{
-		ImGuiHook::Unload();
+		SDK::Shutdown();
 
 		MH_DisableHook(MH_ALL_HOOKS);
+
+		ImGuiHook::Unload();
+
+		ModuleManager::Shutdown();
+
 		MH_RemoveHook(MH_ALL_HOOKS);
 
 		fclose(Client::g_conout);
 		FreeConsole();
-		FreeLibrary(Client::g_instance);
+		FreeLibraryAndExitThread(Client::g_instance, 0);
 	}
 }

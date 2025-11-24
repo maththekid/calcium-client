@@ -1,3 +1,4 @@
+#include<imgui/Custom.hpp>
 #include<imgui/imgui.h>
 #include<imgui/imgui_internal.h>
 
@@ -5,26 +6,14 @@
 
 namespace Menu
 {
-	static bool opened = false;
-
-	bool OnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM param)
-	{
-		if(msg == WM_KEYUP)
-		{
-			if(wparam == VK_INSERT)
-			{
-				Menu::opened = !Menu::opened;
-			}
-		}
-
-		return opened;
-	}
-
 	void RenderMenu()
 	{
-		if(opened)
+		static int keytest = 0;
+
+		if(Menu::g_opened)
 		{
-			ImGui::Begin("fodase");
+			ImGui::Begin("Roberto");
+
 			ImGui::End();
 		}
 	}

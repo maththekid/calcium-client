@@ -14,3 +14,5 @@ file(GLOB libs "libs/*.lib" "libs/*.dll")
 add_library(calcium SHARED ${source})
 
 target_link_libraries(calcium opengl32.lib ${libs})
+
+target_compile_options(calcium PUBLIC /EHsc)

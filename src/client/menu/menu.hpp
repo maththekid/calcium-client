@@ -4,7 +4,7 @@
 
 namespace Menu
 {
-	bool OnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM param);
+	inline bool g_opened = false;
 
 	void RenderMenu();
 }

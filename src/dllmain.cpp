@@ -1,5 +1,3 @@
-#include<thread>
-
 #include<Windows.h>
 
 #include "client/client.hpp"
@@ -9,7 +7,9 @@ bool __stdcall DllMain(HINSTANCE instance, DWORD reason, LPVOID reserved)
 {
 	if(reason == DLL_PROCESS_ATTACH)
 	{
-		std::thread{Client::Init, instance}.detach();
+		DisableThreadLibraryCalls(instance);
+		
+		CreateThread(nullptr, 0, reinterpret_cast<LPTHREAD_START_ROUTINE>(Client::Init), instance, 0, nullptr);
 	}
 
 	return true;
