@@ -11,5 +11,5 @@ namespace ModuleManager
 
 	void Shutdown();
 
-	std::vector<std::shared_ptr<Module>> getModules();
+	std::vector<std::shared_ptr<Module>> GetModules();
 };

@@ -19,7 +19,7 @@ namespace ModuleManager {
 		g_modules.clear();
 	}
 
-	std::vector<std::shared_ptr<Module>> getModules() {
+	std::vector<std::shared_ptr<Module>> GetModules() {
 		return ModuleManager::g_modules;
 	}
 }

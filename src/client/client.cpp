@@ -27,7 +27,7 @@ namespace Client
 				Menu::g_opened = !Menu::g_opened;
 			}
 			
-			for(auto& module : ModuleManager::getModules())
+			for(auto& module : ModuleManager::GetModules())
 			{
 				if(wparam == module->keybind)
 				{
@@ -80,7 +80,7 @@ namespace Client
 				Client::g_running = false;
 			}
 
-			for(auto& module : ModuleManager::getModules())
+			for(auto& module : ModuleManager::GetModules())
 			{
 				if(module->enabled)
 				{

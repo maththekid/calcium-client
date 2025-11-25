@@ -6,6 +6,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS True)
 
 project(calcium)
 
+find_package(cpr REQUIRED)
+find_package(RapidJSON REQUIRED)
+
 include_directories("src" "vendors")
 
 file(GLOB_RECURSE source "vendors/*.cpp" "vendors/*.c" "src/*.cpp" "src/*.c")
@@ -13,6 +16,6 @@ file(GLOB libs "libs/*.lib" "libs/*.dll")
 
 add_library(calcium SHARED ${source})
 
-target_link_libraries(calcium opengl32.lib ${libs})
+target_link_libraries(calcium opengl32.lib cpr::cpr rapidjson ${libs})
 
 target_compile_options(calcium PUBLIC /EHsc)

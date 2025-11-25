@@ -13,9 +13,8 @@ class Module
 
 		void toggle();
 		
-		virtual void onRunning() {}
-
-	protected:
 		virtual void onEnable() {}
 		virtual void onDisable() {}
+		virtual void onRunning() {}
+		virtual void renderSetting() {}
 };

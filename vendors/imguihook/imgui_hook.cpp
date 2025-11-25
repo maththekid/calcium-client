@@ -31,7 +31,7 @@ namespace ImGuiHook
 
     // Global variables
     static HGLRC g_wglContext = nullptr;
-    static bool	 g_initImGui  = false;
+    static bool	 g_init       = false;
     static HWND  g_hWnd       = nullptr;
 
     // Render function variables
@@ -55,107 +55,47 @@ namespace ImGuiHook
         return CallWindowProc(g_WndProc_o, hWnd, uMsg, wParam, lParam);
     }
 
-    static bool InitPlatform()
+    // Hooked wglSwapBuffers function
+    static BOOL WINAPI wglSwapBuffers_h(const HDC hDc)
     {
-        if (!ImGui_ImplWin32_Init(g_hWnd))
+        if(WindowFromDC(hDc) != g_hWnd)
         {
-            g_lastError = "Failed to init ImGui_ImplWin32, g_initImGui = " + std::to_string(g_initImGui);
-            return false;
-        }
-        if (!ImGui_ImplOpenGL2_Init())
-        {
-            g_lastError = "Failed to init ImGui_ImplOpenGL2, g_initImGui = " + std::to_string(g_initImGui);
-            return false;
-        }
-        return true;
-    }
-
-    // Initialisation for ImGui
-    bool Init_ImGui_OpenGL2(const HDC hDc) 
-    {
-        if (WindowFromDC(hDc) == g_hWnd && g_initImGui) 
-            return true;
-
-        g_hWnd = WindowFromDC(hDc);
-
-        if (!g_hWnd) 
-        {
-            g_lastError = "Failed to get window handle from HDC";
-            return false;
+            g_hWnd = WindowFromDC(hDc);
         }
 
-        g_WndProc_o = (WNDPROC)SetWindowLongPtr(g_hWnd, GWLP_WNDPROC, (LONG_PTR)ImGui_WndProc);
-
-        if (!g_WndProc_o) 
+        if(!g_init)
         {
-            g_lastError = "Failed to set WndProc";
-            return false;
+            g_WndProc_o = (WNDPROC)SetWindowLongPtr(g_hWnd, GWLP_WNDPROC, (LONG_PTR)ImGui_WndProc);
+            
+            g_wglContext = wglCreateContext(hDc);
+
+            ImGui::CreateContext();
+
+            ImGui_ImplWin32_Init(g_hWnd);
+            ImGui_ImplOpenGL2_Init();
+
+            g_extraInit();
+
+            g_init = true;
         }
 
-        if (g_initImGui) 
-            return InitPlatform();
-        
-        g_wglContext = wglCreateContext(hDc);
-        if (!g_wglContext)
-        {
-            g_lastError = "Failed to create OpenGL context";
-            return false;
-        }
+        HGLRC o_WglContext = wglGetCurrentContext();
 
-        IMGUI_CHECKVERSION();
-        if (!ImGui::CreateContext())
-        {
-            g_lastError = "Failed to create ImGui context";
-            return false;
-        }
-
-        if (!InitPlatform())
-            return false;
-
-        g_extraInit();
-
-        g_initImGui = true;
-
-        return true;
-    }
-
-    // Generic ImGui renderer for OpenGL2 backend
-    bool Render_ImGui(const HDC hDc)
-    {
-        auto o_WglContext = wglGetCurrentContext();
-        if (!o_WglContext)
-        {
-            g_lastError = "Failed to get current OpenGL context";
-            return false;
-        }
-        if (!wglMakeCurrent(hDc, g_wglContext))
-        {
-            g_lastError = "Failed to make OpenGL context current";
-            return false;
-        }
+        wglMakeCurrent(hDc, g_wglContext);
 
         ImGui_ImplOpenGL2_NewFrame();
         ImGui_ImplWin32_NewFrame();
         ImGui::NewFrame();
+
         g_renderMain();
+
         ImGui::EndFrame();
         ImGui::Render();
+
         ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
 
-        if (!wglMakeCurrent(hDc, o_WglContext))
-        {
-            g_lastError = "Failed to make original OpenGL context current";
-            return false;
-        }
+        wglMakeCurrent(hDc, o_WglContext);
 
-        return true;
-    }
-
-    // Hooked wglSwapBuffers function
-    static BOOL WINAPI wglSwapBuffers_h(const HDC hDc)
-    {
-        Init_ImGui_OpenGL2(hDc);
-        Render_ImGui(hDc);
         return g_wglSwapBuffers_o(hDc);
     }
 

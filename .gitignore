@@ -1,2 +1,4 @@
 build
 setenv.bat
+configure.bat
+vcpkg-configuration.json
