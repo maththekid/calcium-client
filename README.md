@@ -1,5 +1,5 @@
 # Info
-generic ass client, lol
+Base de client que fiz pra passar o tempo
 ## Depedências usadas no projeto
 - [Dear ImGui](https://github.com/ocornut/imgui)
 - [Minhook](https://github.com/TsudaKageyu/minhook)
