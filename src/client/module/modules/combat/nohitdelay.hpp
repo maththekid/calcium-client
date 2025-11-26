@@ -7,8 +7,8 @@ class NoHitDelay : public Module
 	public:
 		NoHitDelay();
 
-	private:
-		void onEnable() override;
-		void onDisable() override;
 		void onRunning() override;
+		void renderSetting() override;
+	private:
+		int counter;
 };

@@ -4,9 +4,9 @@
 #include<Windows.h>
 
 #include<minhook/MinHook.h>
-#include<imguihook/imgui_hook.h>
 
 #include "./client.hpp"
+#include "./hooks/hooks.hpp"
 #include "./menu/menu.hpp"
 #include "./module/moduleManager.hpp"
 #include "sdk/sdk.hpp"
@@ -18,7 +18,7 @@ namespace Client
 
 	static bool g_running = false;
 
-	bool OnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM param)
+	bool OnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		if(msg == WM_KEYUP)
 		{
@@ -62,7 +62,7 @@ namespace Client
 			return;
 		}
 
-		if(!ImGuiHook::Load(Menu::RenderMenu, Client::OnWndProc))
+		if(!Hooks::InitHooks())
 		{
 			Client::Shutdown();
 
@@ -98,14 +98,10 @@ namespace Client
 	{
 		SDK::Shutdown();
 
-		MH_DisableHook(MH_ALL_HOOKS);
-
-		ImGuiHook::Unload();
+		Hooks::ShutdownHooks();
 
 		ModuleManager::Shutdown();
-
-		MH_RemoveHook(MH_ALL_HOOKS);
-
+		
 		fclose(Client::g_conout);
 		FreeConsole();
 		FreeLibraryAndExitThread(Client::g_instance, 0);

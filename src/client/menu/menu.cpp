@@ -23,6 +23,11 @@ namespace Menu
 				{
 					module->toggle();
 				}
+
+				if(tmp_enabled)
+				{
+					module->renderSetting();
+				}
 			}
 
 			ImGui::End();
