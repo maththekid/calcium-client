@@ -26,7 +26,9 @@ namespace Hooks
 	
 	bool OnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		if(ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam) || Client::OnWndProc(hwnd, msg, wparam, lparam))
+		ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
+
+		if(Client::OnWndProc(hwnd, msg, wparam, lparam))
 		{
 			return true;
 		}
@@ -36,25 +38,27 @@ namespace Hooks
 
 	static BOOL OnSwapBuffers(HDC hdc)
 	{
-		if(Hooks::g_init && Hooks::g_hwnd != WindowFromDC(hdc))
-		{
-			Hooks::g_init = false;
-		}
+		Hooks::g_hwnd = WindowFromDC(hdc);
+		HGLRC o_context = wglGetCurrentContext();
 
 		if(!Hooks::g_init)
 		{
-			Hooks::g_hwnd = WindowFromDC(hdc);
 			Hooks::g_context = wglCreateContext(hdc);
+
+			wglMakeCurrent(hdc, g_context);
 
 			glMatrixMode(GL_PROJECTION);
 			glLoadIdentity();
 
 			GLint m_viewport[4];
+
 			glGetIntegerv(GL_VIEWPORT, m_viewport);
 
 			glOrtho(0, m_viewport[2], m_viewport[3], 0, 1, -1);
+
 			glMatrixMode(GL_MODELVIEW);
 			glLoadIdentity();
+			
 			glClearColor(0, 0, 0, 0);
 
 			ImGui::CreateContext();
@@ -66,8 +70,6 @@ namespace Hooks
 
 			g_init = true;
 		}
-
-		HGLRC o_context = wglGetCurrentContext();
 
 		wglMakeCurrent(hdc, g_context);
 
@@ -116,9 +118,10 @@ namespace Hooks
 
 	void ShutdownHooks()
 	{
-		SetWindowLongPtr(Hooks::g_hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Hooks::o_wndproc));
-
 		MH_DisableHook(MH_ALL_HOOKS);
+
+		SetWindowLongPtr(Hooks::g_hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Hooks::o_wndproc));
+		
 		MH_RemoveHook(MH_ALL_HOOKS);
 	}
 }

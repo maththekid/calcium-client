@@ -1,5 +1,8 @@
 #include "./client/minecraft.hpp"
+#include "./entity/entity.hpp"
+#include "./java/list.hpp"
 #include "./sdk.hpp"
+#include "./world/world.hpp"
 
 namespace SDK {
 	bool Init()
@@ -16,7 +19,12 @@ namespace SDK {
 			SDK::g_jvm->AttachCurrentThread(reinterpret_cast<void**>(&SDK::g_env), nullptr);
 		}
 
-		if(!Minecraft::init())
+		if(!(
+			Minecraft::init() &&
+			JList::init() &&
+			World::init() &&
+			Entity::init()
+		))
 		{
 			return false;
 		}

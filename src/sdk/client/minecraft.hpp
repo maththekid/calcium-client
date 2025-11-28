@@ -2,6 +2,8 @@
 
 #include<jni/jni.h>
 
+#include "../world/world.hpp"
+
 class Minecraft
 {
 	private:
@@ -13,6 +15,7 @@ class Minecraft
 		void setLeftClickCounter(int counter);
 
 		static Minecraft getMinecraft();
+		World getLocalWorld();
 		static int getFps();
 
 		static bool init();
