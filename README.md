@@ -1,5 +1,5 @@
 # Info
-Base de client que fiz pra passar o tempo
+Client que fiz pra passar o tempo
 ## Contato
 Discord: https://discord.gg/w3dRUvEGjp
 ## Depedências usadas no projeto
