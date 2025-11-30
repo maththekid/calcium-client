@@ -1,4 +1,5 @@
 #include "./moduleManager.hpp"
+#include "./modules/combat/leftclicker.hpp"
 #include "./modules/combat/nohitdelay.hpp"
 
 namespace ModuleManager {
@@ -6,6 +7,7 @@ namespace ModuleManager {
 
 	void Init()
 	{
+		ModuleManager::g_modules.push_back(std::make_shared<LeftClicker>());
 		ModuleManager::g_modules.push_back(std::make_shared<NoHitDelay>());
 	}
 

@@ -16,6 +16,4 @@ file(GLOB libs "libs/*.lib" "libs/*.dll")
 
 add_library(calcium SHARED ${source})
 
-target_link_libraries(calcium opengl32.lib cpr::cpr rapidjson ${libs})
-
-target_compile_options(calcium PUBLIC /EHsc)
+target_link_libraries(calcium PRIVATE opengl32.lib cpr::cpr rapidjson ${libs})

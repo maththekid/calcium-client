@@ -9,9 +9,8 @@
 #include "./hooks/hooks.hpp"
 #include "./menu/menu.hpp"
 #include "./module/moduleManager.hpp"
-#include "sdk/client/minecraft.hpp"
 #include "sdk/sdk.hpp"
-#include "sdk/world/world.hpp"
+#include "./utils/requestUtils.hpp"
 
 namespace Client
 {
@@ -20,7 +19,9 @@ namespace Client
 
 	static bool g_running = false;
 
-	bool OnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+	static std::vector<std::string> cache_names;
+
+	void OnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		if(msg == WM_KEYUP)
 		{
@@ -37,8 +38,6 @@ namespace Client
 				}
 			}
 		}
-
-		return Menu::g_opened;
 	}
 
 	void Init(HINSTANCE instance)
@@ -64,14 +63,14 @@ namespace Client
 			return;
 		}
 
-		ModuleManager::Init();
-
 		if(!Hooks::InitHooks())
 		{
 			Client::Shutdown();
 
 			return;
 		}
+
+		ModuleManager::Init();
 
 		Client::g_running = true;
 
@@ -81,21 +80,6 @@ namespace Client
 			{
 				Client::g_running = false;
 				break;
-			}
-
-			World world = Minecraft::getMinecraft().getLocalWorld();
-
-			if(world.isInWorld())
-			{
-				std::vector<Entity> playerList = world.getPlayerList();
-
-				if(!playerList.empty())
-				{
-					for(Entity entity : playerList)
-					{
-						std::cout << entity.getName().c_str() << '\n';
-					}
-				}
 			}
 
 			for(auto& module : ModuleManager::GetModules())

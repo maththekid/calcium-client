@@ -18,18 +18,19 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 namespace Hooks
 {
 	static HGLRC g_context = nullptr;
-	static HWND g_hwnd = nullptr;
 	static t_wglswapbuffers o_wglswapbuffers = nullptr;
     static WNDPROC o_wndproc = nullptr;
 
 	static bool g_init = false;
 	
-	bool OnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
+	static LRESULT OnWndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
-		ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
+		Client::OnWndProc(hwnd, msg, wparam, lparam);
 
-		if(Client::OnWndProc(hwnd, msg, wparam, lparam))
+		if(Menu::g_opened)
 		{
+			ImGui_ImplWin32_WndProcHandler(hwnd, msg, wparam, lparam);
+			
 			return true;
 		}
 
@@ -38,11 +39,11 @@ namespace Hooks
 
 	static BOOL OnSwapBuffers(HDC hdc)
 	{
-		Hooks::g_hwnd = WindowFromDC(hdc);
 		HGLRC o_context = wglGetCurrentContext();
 
-		if(!Hooks::g_init)
+		if(!Hooks::g_init || Client::g_hwnd != WindowFromDC(hdc))
 		{
+			Client::g_hwnd = WindowFromDC(hdc);
 			Hooks::g_context = wglCreateContext(hdc);
 
 			wglMakeCurrent(hdc, g_context);
@@ -63,9 +64,9 @@ namespace Hooks
 
 			ImGui::CreateContext();
 
-			o_wndproc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(Hooks::g_hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Hooks::OnWndProc)));
+			o_wndproc = reinterpret_cast<WNDPROC>(SetWindowLongPtr(Client::g_hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Hooks::OnWndProc)));
 
-			ImGui_ImplWin32_Init(Hooks::g_hwnd);
+			ImGui_ImplWin32_InitForOpenGL(Client::g_hwnd);
 			ImGui_ImplOpenGL2_Init();
 
 			g_init = true;
@@ -120,7 +121,7 @@ namespace Hooks
 	{
 		MH_DisableHook(MH_ALL_HOOKS);
 
-		SetWindowLongPtr(Hooks::g_hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Hooks::o_wndproc));
+		SetWindowLongPtr(Client::g_hwnd, GWLP_WNDPROC, reinterpret_cast<LONG_PTR>(Hooks::o_wndproc));
 		
 		MH_RemoveHook(MH_ALL_HOOKS);
 	}

@@ -7,8 +7,9 @@ class NoHitDelay : public Module
 	public:
 		NoHitDelay();
 
-		void onRunning() override;
-		void renderSetting() override;
 	private:
 		int counter;
+
+		void onRunning() override;
+		void renderSetting() override;
 };
