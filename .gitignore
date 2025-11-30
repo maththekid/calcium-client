@@ -1,4 +1,6 @@
+# arquivos inuteis :thumbsup:
 build
 setenv.bat
 configure.bat
 vcpkg-configuration.json
+.vcpkg
